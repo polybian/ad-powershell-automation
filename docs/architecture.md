@@ -2,16 +2,37 @@
 
 ## Scope
 
-Four scripts around one idea: treat a CSV as the desired state for an
-on-prem Active Directory lab domain, and make every change script safe to
-re-run, safe to preview, and easy to audit.
+Five scripts (four since v1, one added in v2) around one idea: treat a CSV
+as the desired state for an on-prem Active Directory lab domain, and make
+every change script safe to re-run, safe to preview, and easy to audit.
 
 ```
 CSV (desired state) ──► New-ADUsersFromCsv.ps1 ──────► OUs + users
 CSV (desired state) ──► Sync-ADGroupMembership.ps1 ──► group membership
 AD (actual state)   ──► Get-StaleADAccounts.ps1 ─────► CSV audit report
 AD (actual state)   ──► Get-GPOInventory.ps1 ────────► CSV audit report
+AD (actual state)   ──► Get-ADHealthReport.ps1 ──────► console + HTML (v2)
 ```
+
+## v2 design notes
+
+- **Replication without `repadmin.exe`:** `Get-ADHealthReport.ps1` reads
+  replication state through `Get-ADReplicationPartnerMetadata`, which
+  returns structured partner metadata (last success time, result code,
+  consecutive failures) straight from the directory. Parsing `repadmin`
+  text output would work, but it is locale-dependent and brittle; the
+  cmdlet is the supported, testable interface.
+- **HTML is a second interface, not a replacement:** CSV stays the audit
+  record. HTML exists for the humans in the loop — a health snapshot or a
+  drift report someone will actually read in a browser. Both HTML reports
+  are self-contained (inline CSS, HTML-escaped values, no external
+  assets) so the file can be archived or attached as-is.
+- **Drift reports are signal, not noise:** the sync only writes the HTML
+  when drift was found; a no-drift run leaves only the CSV. And the write
+  goes through `Out-File`, which honors `-WhatIf` — a dry run reports
+  "What if: Output to File" instead of writing, consistent with the CSV
+  report (a lesson learned in validation: .NET `WriteAllText` silently
+  ignores `-WhatIf` and threw on a fresh output folder).
 
 ## Design decisions
 

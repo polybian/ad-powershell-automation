@@ -82,6 +82,32 @@ Group membership follows the same pattern:
 # Reports land in .\reports\ with a timestamp in the file name
 ```
 
+## Read-only health snapshot (v2)
+
+One script, one picture of the domain:
+
+```powershell
+.\scripts\Get-ADHealthReport.ps1
+# Console summary + reports\ad-health-<timestamp>.html (self-contained,
+# inline CSS, no external assets)
+```
+
+Checks: DC reachability (ping), replication partner status via
+`Get-ADReplicationPartnerMetadata` (never `repadmin.exe`), the five FSMO
+holders, stale computer accounts, locked-out users, and passwords
+expiring within 14 days (`-PasswordExpiryDays` to change the window).
+Read-only — safe to run any time.
+
+## HTML drift report (v2)
+
+```powershell
+.\scripts\Sync-ADGroupMembership.ps1 -CsvPath .\templates\groups.csv.example `
+    -DriftReportPath .\reports
+# Writes reports\group-sync-drift-<timestamp>.html ONLY when drift was found,
+# with Added / Removed-or-drifted / No-change tables. Under -WhatIf it
+# reports the write instead of performing it.
+```
+
 ## Input files
 
 - `templates\users.csv.example` — columns: `FirstName, LastName,
