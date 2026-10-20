@@ -1,0 +1,6 @@
+FirstName,LastName,SamAccountName,UserPrincipalName,OU,Department,Title,Manager
+Alicia,Rivera,arivera,arivera@contoso.example,"OU=Sales,OU=Users,DC=contoso,DC=example",Sales,Account Executive,
+Bruno,Mendez,bmendez,bmendez@contoso.example,"OU=Sales,OU=Users,DC=contoso,DC=example",Sales,Sales Associate,arivera
+Camila,Duarte,cduarte,cduarte@contoso.example,"OU=Support,OU=Users,DC=contoso,DC=example",IT Support,Help Desk Technician,
+Diego,Fuentes,dfuentes,dfuentes@contoso.example,"OU=Support,OU=Users,DC=contoso,DC=example",IT Support,Help Desk Technician,cduarte
+Elena,Soto,esoto,esoto@contoso.example,"OU=Finance,OU=Users,DC=contoso,DC=example",Finance,Staff Accountant,

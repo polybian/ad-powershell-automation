@@ -1,0 +1,13 @@
+# Generated run output — never commit real reports or logs
+logs/
+reports/
+*.log
+
+# Real CSV inputs may contain real names — only *.example templates are committed
+templates/*.csv
+!templates/*.csv.example
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
