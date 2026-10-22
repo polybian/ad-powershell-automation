@@ -130,67 +130,26 @@ behavior (the v1 validation notes below still stand):
   `-RemoveExtra` stays strictly opt-in and `SupportsShouldProcess` is
   unchanged.
 
-## Validation
+## Testing
 
-Validated locally on Linux with PowerShell 7.4.6:
+Checked with PowerShell 7.4.6 and PSScriptAnalyzer 1.25.0:
 
-- All four scripts parse with zero errors via the PowerShell engine's own
-  parser (`[System.Management.Automation.Language.Parser]::ParseFile`).
-- PSScriptAnalyzer 1.25.0: **0 findings** on all four scripts. (First pass
-  flagged `PSUseBOMForUnicodeEncodedFile` on two files for non-ASCII em
-  dashes in comments; fixed at the source by replacing them with ASCII,
-  then re-run clean.)
-- Both CSV templates load cleanly with `Import-Csv` (5 user rows, 5 group
-  rows, columns as documented).
-- The two read-only scripts were executed locally and correctly
-  stop at their module check with a clear "install RSAT" error — the
-  `ActiveDirectory` and `GroupPolicy` modules do not exist on Linux, which
-  is expected.
-
-Not validated here, by design:
-
-- No script has run against a real domain controller in this environment,
-  so `New-ADUser`, OU creation, group changes, and GPO link parsing have
-  **not** been executed end-to-end. Before any real use, run each write
-  script with `-WhatIf` against a throwaway DC (e.g. a Windows Server
-  eval VM promoted to `contoso.example`) and verify the reports, per
-  `docs/runbook.md`.
-
-### v2 validation (2026-10-20)
-
-Environment: PowerShell 7.4.6 (official tarball install from the v1 build, still in place — no
-reinstall needed), PSScriptAnalyzer 1.25.0:
-
-- PowerShell parser: **0 errors** on all five scripts (4 v1 + the new
-  `Get-ADHealthReport.ps1`), including after every v2 fix.
-- PSScriptAnalyzer: **0 findings** (all severities) on all five scripts.
-  Two rounds of findings were fixed at the source with no suppressions:
-  `PSUseShouldProcessForStateChangingFunctions` on the three HTML helper
-  functions (renamed `New-*` → `Get-*` verbs), and one real runtime bug
-  below. Verified: no `SuppressMessage` attributes exist in any script.
-- Both CSV templates still `Import-Csv` cleanly (5 user rows, 5 group
-  rows, columns as documented).
-- Gate behavior: all five scripts still stop cleanly at their module
-  check with the clear "install RSAT" error when run without a domain —
-  this is expected (the `ActiveDirectory` / `GroupPolicy` modules do not
-  exist on Linux). Nothing was written; no partial state was left behind.
-- HTML code paths exercised with mocked AD cmdlets (fictional
-  `contoso.example` data; harness scripts live in `/tmp`, not in this
-  repo): the health script produced a correct console summary and a
-  self-contained HTML report with all seven sections; the group sync
-  wrote a correct drift HTML (Added / Removed-or-drifted / No-change
-  tables) alongside its CSV, and skipped the HTML entirely when no drift
-  existed. Safe-by-default confirmed: the mocked run reported
-  `Removed=0` without `-RemoveExtra`.
-- The mocked harness caught one genuine bug the parser and analyzer
-  could not: passing a `$null` computer `PasswordLastSet` to a
-  `[datetime]` parameter failed argument conversion, fixed with a
-  `[System.Nullable[datetime]]` parameter; and the drift-report write
-  threw under `-WhatIf` with a fresh folder because .NET `WriteAllText`
-  ignores `-WhatIf` — fixed by switching to `Out-File`, which reports
-  "What if: Output to File" instead, matching the CSV report behavior.
-- Honest limits: the HTML tables were validated only against mocked
-  cmdlet output. Attribute names (`msDS-UserPasswordExpiryTimeComputed`,
-  `LastReplicationResult`, `LastReplicationSuccess`, etc.) are the real
-  AD module property names, but a first real-domain run should still
-  verify them against an actual DC before trusting the report.
+- All five scripts parse with zero errors and have **0 PSScriptAnalyzer
+  findings**, with no suppressions. Earlier findings were fixed in the code: a
+  missing BOM caused by non-ASCII characters in comments, and `ShouldProcess`
+  warnings on the HTML helper functions (renamed from `New-*` to `Get-*`).
+- Both CSV templates load with `Import-Csv` (5 users, 5 groups).
+- Without the `ActiveDirectory` and `GroupPolicy` modules, every script stops at
+  its module check with a clear "install RSAT" message and changes nothing.
+- The HTML reports were tested with mocked AD cmdlets and fake
+  `contoso.example` data. The health report produces all seven sections; the
+  group sync writes a drift report next to its CSV, skips it when there's no
+  drift, and removes nothing unless you pass `-RemoveExtra`.
+- That mock testing caught two real bugs: a `$null` `PasswordLastSet` failed to
+  convert to `[datetime]` (fixed with a nullable parameter), and the drift
+  report ignored `-WhatIf` because .NET `WriteAllText` doesn't honor it
+  (switched to `Out-File`).
+- Not run against a real domain controller yet. Before real use, run each write
+  script with `-WhatIf` against a test DC (for example, a Windows Server
+  evaluation VM promoted to `contoso.example`) and confirm the report fields,
+  following `docs/runbook.md`.
