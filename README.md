@@ -132,7 +132,7 @@ behavior (the v1 validation notes below still stand):
 
 ## Validation
 
-Validated in this (Linux) sandbox with PowerShell 7.4.6:
+Validated locally on Linux with PowerShell 7.4.6:
 
 - All four scripts parse with zero errors via the PowerShell engine's own
   parser (`[System.Management.Automation.Language.Parser]::ParseFile`).
@@ -142,7 +142,7 @@ Validated in this (Linux) sandbox with PowerShell 7.4.6:
   then re-run clean.)
 - Both CSV templates load cleanly with `Import-Csv` (5 user rows, 5 group
   rows, columns as documented).
-- The two read-only scripts were executed in the sandbox and correctly
+- The two read-only scripts were executed locally and correctly
   stop at their module check with a clear "install RSAT" error — the
   `ActiveDirectory` and `GroupPolicy` modules do not exist on Linux, which
   is expected.
@@ -158,8 +158,7 @@ Not validated here, by design:
 
 ### v2 validation (2026-10-20)
 
-Sandbox: PowerShell 7.4.6 at `/home/hatch/pwsh7/pwsh` (not on PATH; the
-official tarball install from the v1 build is still in place — no
+Environment: PowerShell 7.4.6 (official tarball install from the v1 build, still in place — no
 reinstall needed), PSScriptAnalyzer 1.25.0:
 
 - PowerShell parser: **0 errors** on all five scripts (4 v1 + the new
