@@ -51,7 +51,6 @@ delegation, and SecureString-only credential handling.
 | `templates/groups.csv.example` | Example desired group membership |
 | `docs/architecture.md` | Design decisions: idempotency, OU design, naming, why the AD module over raw LDAP |
 | `docs/runbook.md` | Prerequisites (RSAT, delegated account) and the -WhatIf-first workflow |
-| `docs/interview-answers.md` | "How did you build this?" — talking points for interviews |
 
 ## Quick start
 
