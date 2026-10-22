@@ -3,7 +3,7 @@
     Exports a GPO inventory with links and enabled state (read-only audit).
 
 .DESCRIPTION
-    Lab script for GPO documentation / change review. Enumerates every GPO
+    PowerShell script for GPO documentation / change review. Enumerates every GPO
     in the domain, resolves where each one is linked (domain, site, or OU),
     and whether each link is enabled or enforced, then writes one row per
     GPO-link to a CSV. Unlinked GPOs get a single row with empty link
@@ -18,7 +18,7 @@
     Writes reports\gpo-inventory-<timestamp>.csv.
 
 .NOTES
-    LAB ONLY. Read-only; requires the GroupPolicy module
+    TEST ENVIRONMENT ONLY. Read-only; requires the GroupPolicy module
     (RSAT "Group Policy Management Tools") and read access to GPOs.
 #>
 [CmdletBinding()]

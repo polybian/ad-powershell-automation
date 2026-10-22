@@ -3,7 +3,7 @@
     Reports stale Active Directory accounts (read-only audit).
 
 .DESCRIPTION
-    Lab script for account hygiene reviews. Queries every user in scope and
+    PowerShell script for account hygiene reviews. Queries every user in scope and
     flags accounts that are disabled, have never logged on, have not logged
     on within -DaysInactive days, or have an expired password. This script
     never modifies anything - its only output is a CSV report an admin can
@@ -28,7 +28,7 @@
     .\Get-StaleADAccounts.ps1 -SearchBase 'OU=Contractors,DC=contoso,DC=example' -DaysInactive 30
 
 .NOTES
-    LAB ONLY. Read-only; requires only read access to user objects plus
+    TEST ENVIRONMENT ONLY. Read-only; requires only read access to user objects plus
     the ActiveDirectory RSAT module.
 #>
 [CmdletBinding()]

@@ -1,6 +1,6 @@
-# AD PowerShell Automation Lab — Bulk Users, Group Sync & AD Audits
+# AD PowerShell Automation Implementation — Bulk Users, Group Sync & AD Audits
 
-A lab build (fictional `contoso.example` domain, no real users or data) for
+An implementation (fictional `contoso.example` domain, no real users or data) for
 the on-prem Active Directory work that shows up in mid-level IT roles:
 bulk-provision OUs and users from a CSV instead of clicking through ADUC,
 keep group membership in a declared desired state, and audit the domain for
@@ -17,7 +17,7 @@ delegation, and SecureString-only credential handling.
   desired state (CSV)                 scripts                        directory
 
   templates/users.csv   ───►  New-ADUsersFromCsv.ps1   ───►  ┌──────────────────┐
-   FirstName, LastName,        validate UPN / SAM / OU       │  LAB DOMAIN      │
+   FirstName, LastName,        validate UPN / SAM / OU       │  TARGET DOMAIN   │
    UPN, OU, Dept, Title        create OUs (parents first)    │ contoso.example  │
                                skip accounts that exist      │                  │
                                                              │  OU=Users        │
@@ -56,7 +56,7 @@ delegation, and SecureString-only credential handling.
 ## Quick start
 
 ```powershell
-# Prerequisites: RSAT AD DS + Group Policy tools, lab DC, delegated account
+# Prerequisites: RSAT AD DS + Group Policy tools, a target DC, delegated account
 # (full details in docs/runbook.md)
 
 # 1. ALWAYS dry-run first — creates nothing, reports WouldCreate per row
@@ -153,7 +153,7 @@ Not validated here, by design:
 - No script has run against a real domain controller in this environment,
   so `New-ADUser`, OU creation, group changes, and GPO link parsing have
   **not** been executed end-to-end. Before any real use, run each write
-  script with `-WhatIf` against a throwaway lab DC (e.g. a Windows Server
+  script with `-WhatIf` against a throwaway DC (e.g. a Windows Server
   eval VM promoted to `contoso.example`) and verify the reports, per
   `docs/runbook.md`.
 
@@ -195,4 +195,4 @@ reinstall needed), PSScriptAnalyzer 1.25.0:
   cmdlet output. Attribute names (`msDS-UserPasswordExpiryTimeComputed`,
   `LastReplicationResult`, `LastReplicationSuccess`, etc.) are the real
   AD module property names, but a first real-domain run should still
-  verify them against an actual lab DC before trusting the report.
+  verify them against an actual DC before trusting the report.

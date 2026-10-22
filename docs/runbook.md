@@ -1,11 +1,11 @@
-# Runbook — Running the AD Automation Lab Scripts
+# Runbook — Running the AD Automation Scripts
 
 ## Prerequisites
 
 | Requirement | Notes |
 |---|---|
-| Lab domain controller | Windows Server with AD DS installed and promoted (e.g. `contoso.example`) |
-| Management workstation | Windows 10/11 domain-joined, or the DC itself for the lab |
+| Domain controller | Windows Server with AD DS installed and promoted (e.g. `contoso.example`) |
+| Management workstation | Windows 10/11 domain-joined, or the DC itself for testing |
 | RSAT: AD DS tools | Provides the `ActiveDirectory` PowerShell module |
 | RSAT: Group Policy Management Tools | Provides the `GroupPolicy` module (needed by `Get-GPOInventory.ps1`) |
 | PowerShell | 5.1 (built into Windows) or PowerShell 7 on Windows |
@@ -112,7 +112,7 @@ Read-only — safe to run any time.
 
 - `templates\users.csv.example` — columns: `FirstName, LastName,
   SamAccountName, UserPrincipalName, OU, Department, Title, Manager`.
-  Copy it, rename to `*.csv`, and replace with your lab data. Real CSVs are
+  Copy it, rename to `*.csv`, and replace with your data. Real CSVs are
   git-ignored (see `.gitignore`); only `.example` templates are committed.
 - `templates\groups.csv.example` — columns: `GroupName, SamAccountName`,
   one row per desired membership.

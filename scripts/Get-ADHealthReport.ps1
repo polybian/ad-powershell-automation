@@ -3,7 +3,7 @@
     Read-only Active Directory health snapshot with console summary and HTML report.
 
 .DESCRIPTION
-    Lab script for AD health checks. Collects, without modifying anything:
+    PowerShell script for AD health checks. Collects, without modifying anything:
       - every domain controller and whether it answers a ping,
       - replication partner status from the AD module's own replication
         cmdlets - this script never shells out to repadmin.exe,
@@ -33,7 +33,7 @@
     Console summary plus reports\ad-health-<timestamp>.html.
 
 .NOTES
-    LAB ONLY. Read-only; requires the ActiveDirectory RSAT module and read
+    TEST ENVIRONMENT ONLY. Read-only; requires the ActiveDirectory RSAT module and read
     access to the directory (an ordinary domain user is enough).
 #>
 [CmdletBinding()]
@@ -61,7 +61,7 @@ catch {
     throw 'The ActiveDirectory module is required. Install RSAT AD DS tools first. See docs/runbook.md.'
 }
 
-function Get-LabHtmlTable {
+function Get-DemoHtmlTable {
     <#
     .SYNOPSIS
         Renders one HTML table from header names plus row value arrays.
@@ -105,7 +105,7 @@ function Get-LabHtmlTable {
     return $sb.ToString()
 }
 
-function Convert-LabDateToDisplayString {
+function Convert-DemoDateToDisplayString {
     <#
     .SYNOPSIS
         Formats a nullable date for the report, showing (never) when unset.
@@ -187,7 +187,7 @@ foreach ($dc in $domainControllers) {
                 $dc.HostName,
                 $partner.Partition,
                 $partnerName,
-                (Convert-LabDateToDisplayString -Value $partner.LastReplicationSuccess),
+                (Convert-DemoDateToDisplayString -Value $partner.LastReplicationSuccess),
                 $partner.LastReplicationResult,
                 $partner.ConsecutiveReplicationFailures,
                 $linkStatus
@@ -220,8 +220,8 @@ foreach ($computer in $computers) {
             $computer.SamAccountName,
             $computer.OperatingSystem,
             $computer.Enabled,
-            (Convert-LabDateToDisplayString -Value $computer.PasswordLastSet),
-            (Convert-LabDateToDisplayString -Value $computer.whenCreated)
+            (Convert-DemoDateToDisplayString -Value $computer.PasswordLastSet),
+            (Convert-DemoDateToDisplayString -Value $computer.whenCreated)
         ))
 }
 
@@ -271,7 +271,7 @@ $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $generatedAt = Get-Date -Format 'u'
 
 # ---- Console summary ----
-Write-Output 'AD health summary (lab, read-only)'
+Write-Output 'AD health summary (read-only)'
 Write-Output "Domain: $($domain.DNSRoot)   Generated: $generatedAt"
 Write-Output "Domain controllers: $($domainControllers.Count) ($($unreachableDcs.Count) unreachable)"
 Write-Output "Replication partner links checked: $($replRows.Count) ($($replProblems.Count) with problems)"
@@ -309,23 +309,23 @@ $summaryRows = @(
 
 $encodedDomain = [System.Net.WebUtility]::HtmlEncode($domain.DNSRoot)
 $body = [System.Text.StringBuilder]::new()
-$null = $body.AppendLine('  <div class="banner"><strong>LAB REPORT</strong> - generated from fictional lab data; contains no production information.</div>')
+$null = $body.AppendLine('  <div class="banner"><strong>TEST REPORT</strong> - generated from fictional data; contains no production information.</div>')
 $null = $body.AppendLine('  <h1>Active Directory Health Report</h1>')
 $null = $body.AppendLine("  <p class=`"meta`">Domain: $encodedDomain | Generated: $generatedAt | Stale computer threshold: $StaleComputerDays days | Password expiry window: $PasswordExpiryDays days</p>")
-$null = $body.Append((Get-LabHtmlTable -Title 'Summary' -Headers @('Check', 'Result') -Rows $summaryRows))
-$null = $body.Append((Get-LabHtmlTable -Title 'Domain controllers' -Headers @('Host name', 'IPv4', 'Site', 'Operating system', 'Reachability') -Rows $dcRows.ToArray()))
-$null = $body.Append((Get-LabHtmlTable -Title 'Replication partner links' -Headers @('Target DC', 'Partition', 'Partner', 'Last success (UTC)', 'Last result', 'Consecutive failures', 'Status') -Rows $replRows.ToArray()))
-$null = $body.Append((Get-LabHtmlTable -Title 'FSMO role holders' -Headers @('Role', 'Holder') -Rows $fsmoRows))
-$null = $body.Append((Get-LabHtmlTable -Title "Stale computer accounts ($staleComputerCount)" -Headers @('Account', 'Operating system', 'Enabled', 'Password last set (UTC)', 'Created (UTC)') -Rows $staleComputerRows.ToArray()))
-$null = $body.Append((Get-LabHtmlTable -Title "Locked-out user accounts ($($lockedOut.Count))" -Headers @('sAMAccountName', 'Name', 'Enabled') -Rows $lockedRows.ToArray()))
-$null = $body.Append((Get-LabHtmlTable -Title "Passwords expired or expiring within $PasswordExpiryDays days ($($expiringRows.Count))" -Headers @('sAMAccountName', 'Name', 'Expires (UTC)', 'Status') -Rows $expiringRows.ToArray()))
+$null = $body.Append((Get-DemoHtmlTable -Title 'Summary' -Headers @('Check', 'Result') -Rows $summaryRows))
+$null = $body.Append((Get-DemoHtmlTable -Title 'Domain controllers' -Headers @('Host name', 'IPv4', 'Site', 'Operating system', 'Reachability') -Rows $dcRows.ToArray()))
+$null = $body.Append((Get-DemoHtmlTable -Title 'Replication partner links' -Headers @('Target DC', 'Partition', 'Partner', 'Last success (UTC)', 'Last result', 'Consecutive failures', 'Status') -Rows $replRows.ToArray()))
+$null = $body.Append((Get-DemoHtmlTable -Title 'FSMO role holders' -Headers @('Role', 'Holder') -Rows $fsmoRows))
+$null = $body.Append((Get-DemoHtmlTable -Title "Stale computer accounts ($staleComputerCount)" -Headers @('Account', 'Operating system', 'Enabled', 'Password last set (UTC)', 'Created (UTC)') -Rows $staleComputerRows.ToArray()))
+$null = $body.Append((Get-DemoHtmlTable -Title "Locked-out user accounts ($($lockedOut.Count))" -Headers @('sAMAccountName', 'Name', 'Enabled') -Rows $lockedRows.ToArray()))
+$null = $body.Append((Get-DemoHtmlTable -Title "Passwords expired or expiring within $PasswordExpiryDays days ($($expiringRows.Count))" -Headers @('sAMAccountName', 'Name', 'Expires (UTC)', 'Status') -Rows $expiringRows.ToArray()))
 
 $doc = [System.Text.StringBuilder]::new()
 $null = $doc.AppendLine('<!DOCTYPE html>')
 $null = $doc.AppendLine('<html lang="en">')
 $null = $doc.AppendLine('<head>')
 $null = $doc.AppendLine('  <meta charset="utf-8">')
-$null = $doc.AppendLine('  <title>AD Health Report (Lab)</title>')
+$null = $doc.AppendLine('  <title>AD Health Report</title>')
 $null = $doc.AppendLine('  <style>')
 $null = $doc.AppendLine($css)
 $null = $doc.AppendLine('  </style>')

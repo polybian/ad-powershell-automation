@@ -3,7 +3,7 @@
 ## Scope
 
 Five scripts (four since v1, one added in v2) around one idea: treat a CSV
-as the desired state for an on-prem Active Directory lab domain, and make
+as the desired state for an on-prem Active Directory domain, and make
 every change script safe to re-run, safe to preview, and easy to audit.
 
 ```
@@ -100,7 +100,7 @@ convenience; the CSV is the audit record.
   `-Identity`/`-Filter` patterns, so scripts read the same way an AD admin
   already works.
 - Trade-off, stated honestly: the module requires RSAT and a Windows host
-  (or a domain-joined management workstation). For a lab portfolio project
+  (or a domain-joined management workstation). For a portfolio project
   that is the right constraint — these scripts are meant to run where AD
   admins actually run them.
 

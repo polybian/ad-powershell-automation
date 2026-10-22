@@ -3,7 +3,7 @@
     Creates Active Directory OUs and user accounts in bulk from a CSV file.
 
 .DESCRIPTION
-    Lab script for onboarding-style provisioning. Reads one row per user from
+    PowerShell script for onboarding-style provisioning. Reads one row per user from
     a CSV file, creates any missing OUs (parents first), then creates each
     account with New-ADUser. The script is idempotent: existing OUs and
     existing accounts are skipped, so re-running the same CSV is safe.
@@ -42,10 +42,10 @@
     $pw = Read-Host 'Temp password' -AsSecureString
     .\New-ADUsersFromCsv.ps1 -CsvPath .\new-hires.csv -InitialPassword $pw
 
-    Real run against the lab domain.
+    Real run against the target domain.
 
 .NOTES
-    LAB ONLY. Requires the ActiveDirectory RSAT module and an account with
+    TEST ENVIRONMENT ONLY. Requires the ActiveDirectory RSAT module and an account with
     delegated rights to create OUs/users under the target OUs.
 #>
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
@@ -73,7 +73,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-function New-LabOrganizationalUnitPath {
+function New-DemoOrganizationalUnitPath {
     <#
     .SYNOPSIS
         Creates an OU and any missing parents, leaf-first safe.
@@ -103,7 +103,7 @@ function New-LabOrganizationalUnitPath {
     # Ensure the parent exists before creating the child.
     $parentDN = $DistinguishedName -replace '^OU=[^,]+,', ''
     if ($parentDN -ne $DomainBaseDN) {
-        New-LabOrganizationalUnitPath -DistinguishedName $parentDN -DomainBaseDN $DomainBaseDN
+        New-DemoOrganizationalUnitPath -DistinguishedName $parentDN -DomainBaseDN $DomainBaseDN
     }
 
     if ($DistinguishedName -match '^OU=([^,]+),') {
@@ -182,7 +182,7 @@ foreach ($row in $rows) {
         }
 
         # ---- Create the OU chain (parents first), then the user ----
-        New-LabOrganizationalUnitPath -DistinguishedName $ouDN -DomainBaseDN $BaseDN
+        New-DemoOrganizationalUnitPath -DistinguishedName $ouDN -DomainBaseDN $BaseDN
 
         $newUserParams = @{
             Name              = "$($row.FirstName.Trim()) $($row.LastName.Trim())"

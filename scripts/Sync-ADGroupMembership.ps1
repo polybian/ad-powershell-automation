@@ -3,7 +3,7 @@
     Reconciles AD group membership against a desired-state CSV.
 
 .DESCRIPTION
-    Lab script for access-review style work. The CSV declares the desired
+    PowerShell script for access-review style work. The CSV declares the desired
     state as one row per (GroupName, SamAccountName) pair. For every group
     the script compares desired vs actual membership and:
       - adds members that are missing (with -WhatIf support),
@@ -46,7 +46,7 @@
     .\reports when drift is found.
 
 .NOTES
-    LAB ONLY. Requires the ActiveDirectory RSAT module and an account with
+    TEST ENVIRONMENT ONLY. Requires the ActiveDirectory RSAT module and an account with
     delegated rights to modify group membership.
 #>
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
@@ -77,7 +77,7 @@ catch {
     throw 'The ActiveDirectory module is required. Install RSAT AD DS tools first. See docs/runbook.md.'
 }
 
-function Get-LabHtmlTable {
+function Get-DemoHtmlTable {
     <#
     .SYNOPSIS
         Renders one HTML table from header names plus row value arrays.
@@ -121,7 +121,7 @@ function Get-LabHtmlTable {
     return $sb.ToString()
 }
 
-function Get-LabDriftHtml {
+function Get-DemoDriftHtml {
     <#
     .SYNOPSIS
         Builds the self-contained HTML drift report for a group sync run.
@@ -182,14 +182,14 @@ tr:nth-child(even) td { background: #f2f5fa; }
 '@
 
     $body = [System.Text.StringBuilder]::new()
-    $null = $body.AppendLine('  <div class="banner"><strong>LAB REPORT</strong> - generated from fictional lab data; contains no production information.</div>')
+    $null = $body.AppendLine('  <div class="banner"><strong>TEST REPORT</strong> - generated from fictional data; contains no production information.</div>')
     $null = $body.AppendLine('  <h1>Group Sync Drift Report</h1>')
     $null = $body.AppendLine("  <p class=`"meta`">Source CSV: $encodedCsv | Generated: $generatedAt | Mode: $mode</p>")
-    $null = $body.Append((Get-LabHtmlTable -Title "Added members ($($addedRows.Count))" -Headers $tableHeaders -Rows $addedRows.ToArray()))
-    $null = $body.Append((Get-LabHtmlTable -Title "Removed or drifted members ($($removedRows.Count))" -Headers $tableHeaders -Rows $removedRows.ToArray()))
-    $null = $body.Append((Get-LabHtmlTable -Title "No change ($($unchangedRows.Count))" -Headers $tableHeaders -Rows $unchangedRows.ToArray()))
+    $null = $body.Append((Get-DemoHtmlTable -Title "Added members ($($addedRows.Count))" -Headers $tableHeaders -Rows $addedRows.ToArray()))
+    $null = $body.Append((Get-DemoHtmlTable -Title "Removed or drifted members ($($removedRows.Count))" -Headers $tableHeaders -Rows $removedRows.ToArray()))
+    $null = $body.Append((Get-DemoHtmlTable -Title "No change ($($unchangedRows.Count))" -Headers $tableHeaders -Rows $unchangedRows.ToArray()))
     if ($issueRows.Count -gt 0) {
-        $null = $body.Append((Get-LabHtmlTable -Title "Errors / missing groups ($($issueRows.Count))" -Headers $tableHeaders -Rows $issueRows.ToArray()))
+        $null = $body.Append((Get-DemoHtmlTable -Title "Errors / missing groups ($($issueRows.Count))" -Headers $tableHeaders -Rows $issueRows.ToArray()))
     }
 
     $doc = [System.Text.StringBuilder]::new()
@@ -197,7 +197,7 @@ tr:nth-child(even) td { background: #f2f5fa; }
     $null = $doc.AppendLine('<html lang="en">')
     $null = $doc.AppendLine('<head>')
     $null = $doc.AppendLine('  <meta charset="utf-8">')
-    $null = $doc.AppendLine('  <title>Group Sync Drift Report (Lab)</title>')
+    $null = $doc.AppendLine('  <title>Group Sync Drift Report</title>')
     $null = $doc.AppendLine('  <style>')
     $null = $doc.AppendLine($css)
     $null = $doc.AppendLine('  </style>')
@@ -366,7 +366,7 @@ $issuesFound = @($report | Where-Object { $issueActionNames -contains $_.Action 
 if (-not [string]::IsNullOrWhiteSpace($DriftReportPath) -and ($driftFound -or $issuesFound)) {
     $null = New-Item -Path $DriftReportPath -ItemType Directory -Force
     $driftHtmlPath = Join-Path -Path $DriftReportPath -ChildPath "group-sync-drift-$stamp.html"
-    $driftHtml = Get-LabDriftHtml -SyncReport $report -CsvPath $CsvPath -RemoveExtra:$RemoveExtra
+    $driftHtml = Get-DemoDriftHtml -SyncReport $report -CsvPath $CsvPath -RemoveExtra:$RemoveExtra
     # Out-File (unlike .NET WriteAllText) honors -WhatIf, so a dry run
     # reports instead of writing; utf8NoBOM needs PS 6+, hence the fallback.
     $fileEncoding = 'UTF8'
